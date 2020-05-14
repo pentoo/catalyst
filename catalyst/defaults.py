@@ -12,6 +12,8 @@ valid_config_file_values = frozenset([
     "digests",
     "distdir",
     "envscript",
+    "jobs",
+    "load-average",
     "options",
     "port_logdir",
     "repo_basedir",
