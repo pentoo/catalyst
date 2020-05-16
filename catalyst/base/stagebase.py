@@ -15,6 +15,7 @@ from DeComp.compress import CompressMap
 
 from catalyst import log
 from catalyst.defaults import (confdefaults, MOUNT_DEFAULTS, PORT_LOGDIR_CLEAN)
+from catalyst.mount import MS, mount, umount
 from catalyst.support import (CatalystError, file_locate, normpath,
                               cmd, read_makeconf, ismount, file_check)
 from catalyst.base.targetbase import TargetBase
@@ -847,7 +848,9 @@ class StageBase(TargetBase, ClearBase, GenBase):
 
             source = str(self.mount[x]['source'])
             target = self.settings['chroot_path'] + str(self.mount[x]['target'])
-            mount = ['mount']
+            filesystem = ''
+            flags = MS.NONE
+            options = ''
 
             log.debug('bind %s: "%s" -> "%s"', x, source, target)
 
@@ -855,18 +858,19 @@ class StageBase(TargetBase, ClearBase, GenBase):
                 if 'var_tmpfs_portage' not in self.settings:
                     continue
 
-                mount += ['-t', 'tmpfs', '-o',
-                          f"size={self.settings['var_tmpfs_portage']}G"]
+                filesystem = 'tmpfs'
+                options = f"size={self.settings['var_tmpfs_portage']}G"
             elif source == 'tmpfs':
-                mount += ['-t', 'tmpfs']
+                filesystem = 'tmpfs'
             elif source == 'shm':
-                mount += ['-t', 'tmpfs', '-o', 'noexec,nosuid,nodev']
+                filesystem = 'tmpfs'
+                flags = MS.NOEXEC | MS.NOSUID | MS.NODEV
             else:
                 source_path = Path(self.mount[x]['source'])
                 if source_path.suffix == '.sqfs':
-                    mount += ['-o', 'ro']
+                    flags = MS.RDONLY
                 else:
-                    mount.append('--bind')
+                    flags = MS.BIND
 
                     # We may need to create the source of the bind mount. E.g., in the
                     # case of an empty package cache we must create the directory that
@@ -875,7 +879,11 @@ class StageBase(TargetBase, ClearBase, GenBase):
 
             Path(target).mkdir(mode=0o755, parents=True, exist_ok=True)
 
-            cmd(mount + [source, target], env=self.env, fail_func=self.unbind)
+            try:
+                mount(source, target, filesystem, flags, options)
+            except OSError as e:
+                self.unbind()
+                raise CatalystError
 
     def unbind(self):
         ouch = 0
@@ -893,7 +901,7 @@ class StageBase(TargetBase, ClearBase, GenBase):
                 continue
 
             try:
-                cmd(['umount', target], env=self.env)
+                umount(target)
             except CatalystError:
                 log.warning('First attempt to unmount failed: %s', target)
                 log.warning('Killing any pids still running in the chroot')
@@ -901,7 +909,7 @@ class StageBase(TargetBase, ClearBase, GenBase):
                 self.kill_chroot_pids()
 
                 try:
-                    cmd(['umount', target], env=self.env)
+                    umount(target)
                 except CatalystError:
                     ouch = 1
                     log.warning("Couldn't umount bind mount: %s", target)
