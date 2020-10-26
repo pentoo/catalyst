@@ -75,6 +75,7 @@ class snapshot(TargetBase, GenBase):
 			basedir=mytmp,
 			filename=self.settings["snapshot_path"],
 			mode=self.settings["compression_mode"],
+			other_options = self.settings["compressor_options"],
 			auto_extension=True
 			)
 		if not compressor.compress(infodict):
