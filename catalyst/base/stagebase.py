@@ -902,21 +902,22 @@ class StageBase(TargetBase, ClearBase, GenBase):
 				self.snapcache_lock.unlock()
 
 	def config_profile_link(self):
-		if "autoresume" in self.settings["options"] \
-			and self.resume.is_enabled("config_profile_link"):
-			log.notice('Resume point detected, skipping config_profile_link operation...')
-		else:
-			# TODO: zmedico and I discussed making this a directory and pushing
-			# in a parent file, as well as other user-specified configuration.
-			log.info('Configuring profile link...')
-			clear_path(self.settings['chroot_path'] + \
-				self.settings['port_conf'] + '/make.profile')
-			ensure_dirs(self.settings['chroot_path'] + self.settings['port_conf'])
-			cmd(['ln', '-sf',
-				'../..' + self.settings['portdir'] + '/profiles/' + self.settings['target_profile'],
-				self.settings['chroot_path'] + self.settings['port_conf'] + '/make.profile'],
-				env=self.env)
-			self.resume.enable("config_profile_link")
+		# The bash handles all this using eselect profile, no point doing it twice and differently both times
+		#if "autoresume" in self.settings["options"] \
+		#	and self.resume.is_enabled("config_profile_link"):
+		#	log.notice('Resume point detected, skipping config_profile_link operation...')
+		#else:
+		#	# TODO: zmedico and I discussed making this a directory and pushing
+		#	# in a parent file, as well as other user-specified configuration.
+		#	log.info('Configuring profile link...')
+		#	clear_path(self.settings['chroot_path'] + \
+		#		self.settings['port_conf'] + '/make.profile')
+		#	ensure_dirs(self.settings['chroot_path'] + self.settings['port_conf'])
+		#	cmd(['ln', '-sf',
+		#		'../..' + self.settings['portdir'] + '/profiles/' + self.settings['target_profile'],
+		#		self.settings['chroot_path'] + self.settings['port_conf'] + '/make.profile'],
+		#		env=self.env)
+		self.resume.enable("config_profile_link")
 
 	def setup_confdir(self):
 		if "autoresume" in self.settings["options"] \
