@@ -17,7 +17,7 @@ class snapshot(TargetBase, GenBase):
 	"""
 	def __init__(self,myspec,addlargs):
 		self.required_values=["version_stamp","target"]
-		self.valid_values=["version_stamp","target", "compression_mode"]
+		self.valid_values=["version_stamp","target", "compression_mode", "compressor_options"]
 
 		TargetBase.__init__(self, myspec, addlargs)
 		GenBase.__init__(self,myspec)
@@ -75,7 +75,7 @@ class snapshot(TargetBase, GenBase):
 			basedir=mytmp,
 			filename=self.settings["snapshot_path"],
 			mode=self.settings["compression_mode"],
-			other_options = self.settings["compressor_options"],
+			other_options=self.settings["compressor_options"],
 			auto_extension=True
 			)
 		if not compressor.compress(infodict):
