@@ -146,7 +146,7 @@ case ${clst_hostarch} in
 
 			dd if=/dev/zero of="${clst_target_path}/gentoo.efimg" bs=1k \
 				count=${iaSize}
-			mkfs.vfat -F 16 -n GENTOO "${clst_target_path}/gentoo.efimg"
+			mkfs.vfat -n GENTOO "${clst_target_path}/gentoo.efimg"
 
 			mkdir "${clst_target_path}/gentoo.efimg.mountPoint"
 			mount -t vfat -o loop "${clst_target_path}/gentoo.efimg" \
@@ -269,8 +269,8 @@ case ${clst_hostarch} in
 				echo "Creating loopback file of size ${iaSize}kB"
 				dd if=/dev/zero of="${clst_target_path}/gentoo.efimg" bs=1k \
 					count=${iaSize}
-				echo "Formatting loopback file with FAT16 FS"
-				mkfs.vfat -F 16 -n GENTOOLIVE "${clst_target_path}/gentoo.efimg"
+				echo "Formatting loopback file with FAT FS"
+				mkfs.vfat -n GENTOOLIVE "${clst_target_path}/gentoo.efimg"
 
 				mkdir "${clst_target_path}/gentoo.efimg.mountPoint"
 				echo "Mounting FAT16 loopback file"
